@@ -70,9 +70,8 @@ def main():
                 #Get user email and password
                 user_email = input("Enter email: ")
                 user_password = input("Enter password: ")
-               
                 for user in users:
-                    # Check if users has its email stored
+                    # Check if users has already created account
                     if user_email in user.values() and user_password in user.values():
                         # Stop the main and login_active loop once email and password verified
                         active = False 
