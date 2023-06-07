@@ -74,7 +74,7 @@ def main():
                     # Check if users has already created account
                     if user_email in user.values() and user_password in user.values():
                         # Stop the main and login_active loop once email and password verified
-                        active = False 
+                        # active = False 
                         log_active = False
                         dashboard_active = True
                         while dashboard_active:
@@ -89,6 +89,7 @@ def main():
                             print(f"3 - Update a book{em_update}")
                             print(f"4 - Delete a book{em_delete}")
                             print("5 - Search for a book")
+                            print("6 - Logout")
 
                             # Get user input
                             user_action = input("Please select action to perform below: ")
@@ -96,7 +97,8 @@ def main():
                                 print("Displaying book...")
                                 for book in books:
                                     print(book)
-                                    dashboard_active = False 
+                                    dashboard_active = False
+                                    active = False 
                             if user_action == '2':
                                 print("Adding book..")
                                 dashboard_active = False 
@@ -109,6 +111,10 @@ def main():
                             if user_action == '5':
                                 print("Adding book..")
                                 dashboard_active = False 
+                            if user_action == '6':
+                                print("Logging out..")
+                                dashboard_active = False 
+                                active = True
 
                     elif user_email not in user.values() and user_password not in user.values():
                         print('User not found!! Please create account')
@@ -161,6 +167,7 @@ def main():
                         print(f"3 - Update a book{em_update}")
                         print(f"4 - Delete a book{em_delete}")
                         print("5 - Search for a book")
+                        print("6 - Logout")
                         # Get user input
                         user_action = input("Please select action to perform below: ")
                         if user_action == '1':
@@ -178,6 +185,9 @@ def main():
                             dashboard_active = False 
                         if user_action == '5':
                             print("Adding book..")
+                            dashboard_active = False 
+                        if user_action == '6':
+                            print("Logging out..")
                             dashboard_active = False 
 
         elif user_response == '3':
