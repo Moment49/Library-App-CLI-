@@ -29,7 +29,7 @@ class Book:
 
 
 # List to hold user profile
-users = []
+users = [{'full_name': 'Elvis ibenacho', 'user_email': 'ibe@gmail.com', 'password': 'moment', 'confirm_password':'moment'}]
 
 #List to store all books from API 
 books = []
@@ -45,9 +45,9 @@ data = response.text
 # Parse or convert the json string to dictionary using the loads() method
 res = json.loads(data)
 for data in res['books']:
-    print(data)
     # Append the book data to the books list
     books.append(data)
+
 
 # Main Program
 def main():
@@ -65,9 +65,57 @@ def main():
         user_response = input(main_prompt)
         if user_response == '1':
             print("\n...Login details...\n")
-            print("Enter email: ") 
-            print("Enter password: ")    
-            # active = False
+            log_active = True
+            while log_active:
+                #Get user email and password
+                user_email = input("Enter email: ")
+                user_password = input("Enter password: ")
+               
+                for user in users:
+                    # Check if users has its email stored
+                    if user_email in user.values() and user_password in user.values():
+                        # Stop the main and login_active loop once email and password verified
+                        active = False 
+                        log_active = False
+                        dashboard_active = True
+                        while dashboard_active:
+                            print('found user!!! Login successful')
+                            em_show = emoji.emojize("📚")
+                            em_add = emoji.emojize("📖")
+                            em_update = emoji.emojize("📗")
+                            em_delete = emoji.emojize("📕")
+                            print(f"\n...Welcome Back - {user['full_name']}\n")
+                            print(f"1 - Show all books {em_show}{em_show} ")
+                            print(f"2 - Add a book{em_add}")
+                            print(f"3 - Update a book{em_update}")
+                            print(f"4 - Delete a book{em_delete}")
+                            print("5 - Search for a book")
+
+                            # Get user input
+                            user_action = input("Please select action to perform below: ")
+                            if user_action == '1':
+                                print("Displaying book...")
+                                for book in books:
+                                    print(book)
+                                    dashboard_active = False 
+                            if user_action == '2':
+                                print("Adding book..")
+                                dashboard_active = False 
+                            if user_action == '3':
+                                print("Update book..")
+                                dashboard_active = False 
+                            if user_action == '4':
+                                print("Delete book..")
+                                dashboard_active = False 
+                            if user_action == '5':
+                                print("Adding book..")
+                                dashboard_active = False 
+
+                    elif user_email not in user.values() and user_password not in user.values():
+                        print('User not found!! Please create account')
+                    else:
+                        print("Invalid email or password")
+                
         elif user_response == '2':
             user_isValid = True
             while user_isValid:
@@ -99,7 +147,7 @@ def main():
                     _user = User(f_name, u_email, u_password, c_password)
                     users.append(_user.create_profile())
                     print("\nCreating user...")
-                    print("Login successful...")
+                    print("Sign up successful...")
                     user_isValid = False 
                     active = False
                     dashboard_active = True
@@ -114,19 +162,36 @@ def main():
                         print(f"3 - Update a book{em_update}")
                         print(f"4 - Delete a book{em_delete}")
                         print("5 - Search for a book")
-
                         # Get user input
                         user_action = input("Please select action to perform below: ")
                         if user_action == '1':
-                            print()
                             for book in books:
                                 print(book)
                             dashboard_active = False
+                        if user_action == '2':
+                            print("Adding book..")
+                            dashboard_active = False 
+                        if user_action == '3':
+                            print("Update book..")
+                            dashboard_active = False 
+                        if user_action == '4':
+                            print("Delete book..")
+                            dashboard_active = False 
+                        if user_action == '5':
+                            print("Adding book..")
+                            dashboard_active = False 
+
         elif user_response == '3':
             # To terminate the main program
             active = False                
         else:
             print("Sorry, please select a valid option")
+
+
+
+
+
+
 
 
 if __name__ == '__main__':
