@@ -1,6 +1,7 @@
 import emoji
 import requests
 import json
+import database
 
 
 # User Class
@@ -24,15 +25,29 @@ class User:
 # Book Class
 class Book:
     """A call to model a book"""
-    def __init__(self):
-        pass
+    def __init__(self, book_id, title, subtitle, authors, book_img, book_url):
+        self.book_id = book_id
+        self.title = title
+        self.subtitle = subtitle
+        self.authors = authors
+        self.book_img = book_img
+        self.book_url = book_url
+    def Add_book(self, **book_details):
+        self.book_details = book_details
+        self.book_details['id'] = self.book_id
+        self.book_details['title'] = self.title
+        self.book_details['subtitle'] = self.subtitle
+        self.book_details['authors'] = self.authors
+        self.book_details['image'] = self.book_img
+        self.book_details['url'] = self.book_url
+        return book_details
 
 
 # List to hold user profile
-users = [{'full_name': 'Elvis ibenacho', 'user_email': 'ibe@gmail.com', 'password': 'moment', 'confirm_password':'moment'}]
+users_list = [{'full_name': 'Elvis ibenacho', 'user_email': 'ibe@gmail.com', 'password': 'moment', 'confirm_password':'moment'}]
 
-#List to store all books from API 
-books = []
+#List to store all books from API and from the book class
+books_list = []
 
 #Make an API request to an end point to fetch books data
 URL = "https://www.dbooks.org/api/search/all" 
@@ -46,7 +61,11 @@ data = response.text
 res = json.loads(data)
 for data in res['books']:
     # Append the book data to the books list
-    books.append(data)
+    books_list.append(data)
+
+
+
+
 
 
 # Main Program
@@ -70,7 +89,7 @@ def main():
                 #Get user email and password
                 user_email = input("Enter email: ")
                 user_password = input("Enter password: ")
-                for user in users:
+                for user in users_list:
                     # Check if users has already created account
                     if user_email in user.values() and user_password in user.values():
                         # Stop the main and login_active loop once email and password verified
@@ -94,13 +113,22 @@ def main():
                             # Get user input
                             user_action = input("Please select action to perform below: ")
                             if user_action == '1':
-                                print("Displaying book...")
-                                for book in books:
+                                print("Displaying All book...")
+                                for book in books_list:
                                     print(book)
                                     dashboard_active = False
                                     active = False 
                             if user_action == '2':
                                 print("Adding book..")
+                                book_no = int(input("ISBN: "))
+                                book_title = input("Book title: ")
+                                book_subtitle = input("Book subtitle: ")
+                                book_authors = input("Book authors: ")
+                                book_image = input("Book image_url: ")
+                                book_url = input("Book url: ")
+                                book = Book(book_no, book_title, book_subtitle, book_authors, book_image, book_url)
+                                # Add book to books_list
+                                books_list.append(book.Add_book())
                                 dashboard_active = False 
                             if user_action == '3':
                                 print("Update book..")
@@ -150,7 +178,10 @@ def main():
                     
                     # Creates the user after registering
                     _user = User(f_name, u_email, u_password, c_password)
-                    users.append(_user.create_profile())
+                    # Appends user to the list
+                    users_list.append(_user.create_profile())
+                    # Push users to the database(users)
+                    database.Add_User(f_name, u_email, u_password, c_password)
                     print("\nCreating user...")
                     print("Sign up successful...")
                     user_isValid = False 
@@ -171,7 +202,7 @@ def main():
                         # Get user input
                         user_action = input("Please select action to perform below: ")
                         if user_action == '1':
-                            for book in books:
+                            for book in books_list:
                                 print(book)
                             dashboard_active = False
                         if user_action == '2':
@@ -203,10 +234,15 @@ def main():
 
 
 
+
+
+
+
+
+
+
 if __name__ == '__main__':
     main()
-
-
 
 
 
