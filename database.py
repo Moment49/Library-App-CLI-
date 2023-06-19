@@ -21,12 +21,13 @@ c = connect.cursor()
 # Create the database table (Users Table)
 # c.execute("""CREATE TABLE users(
 #         full_name text NOT NULL, 
-#         email_id text,
+#         user_email text,
 #         password text,
 #         confirm_password text,
-#         PRIMARY KEY(email_id)
+#         PRIMARY KEY(user_email)
       
 # )""")
+
 
 # Functions to Insert the users
 def Add_User(full_name, email_id, password, confirm_password):
@@ -36,9 +37,19 @@ def Add_User(full_name, email_id, password, confirm_password):
     conn.commit()
     conn.close()
 
-c.execute("SELECT * FROM users")
+# c.execute("SELECT * FROM users")
 
+# Function to query all users from database
+def get_user():
+    """A function to query user from database"""
+    conn = sqlite3.connect('users.db')
+    c = conn.cursor()
+    c.execute("SELECT * FROM users")
+    items = c.fetchall()
+    return items
+    
 
+get_user()
 
 
 

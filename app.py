@@ -44,7 +44,28 @@ class Book:
 
 
 # List to hold user profile
-users_list = [{'full_name': 'Elvis ibenacho', 'user_email': 'ibe@gmail.com', 'password': 'moment', 'confirm_password':'moment'}]
+users_list = []
+#Return the results from the database and push to the users_list
+def fetch_user_db(query):
+    user_info = {
+    'full_name': None,
+    'user_email': None,
+    'password': None,
+    'confirm_password': None
+    }
+    # Convert the user_data from tuple to dictionary
+    for user_row in query:
+        user_temp_info = user_info.copy()
+        for index, key in enumerate(user_info):
+            user_temp_info[key] = user_row[index]
+
+        # Push user_info from db back to list
+        users_list.append(user_temp_info)
+
+# Call the user_info from db
+users = database.get_user()
+fetch_user_db(users)
+
 
 #List to store all books from API and from the book class
 books_list = []
@@ -62,9 +83,6 @@ res = json.loads(data)
 for data in res['books']:
     # Append the book data to the books list
     books_list.append(data)
-
-
-
 
 
 
@@ -180,6 +198,7 @@ def main():
                     _user = User(f_name, u_email, u_password, c_password)
                     # Appends user to the list
                     users_list.append(_user.create_profile())
+
                     # Push users to the database(users)
                     database.Add_User(f_name, u_email, u_password, c_password)
                     print("\nCreating user...")
@@ -229,18 +248,6 @@ def main():
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 if __name__ == '__main__':
     main()
 
@@ -283,6 +290,6 @@ if __name__ == '__main__':
 
 
 
-# # Making a Api get() request 
-# url =  "https://www.dbooks.org/api/search/all"
-# response = requests.get(url)
+# # # Making a Api get() request 
+# # url =  "https://www.dbooks.org/api/search/all"
+# # response = requests.get(url)
