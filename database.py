@@ -2,7 +2,8 @@ import sqlite3
 
 # Set up database conncetion
 connect = sqlite3.connect("users.db")
-
+connect = sqlite3.connect("books.db")
+connect.row_factory = sqlite3.Row   
 # Create a cursor or pointer to the db
 c = connect.cursor()
 
@@ -13,9 +14,7 @@ c = connect.cursor()
 #         subtitle TEXT,
 #         authors TEXT,
 #         image TEXT,
-#         url TEXT,
-#         email_id TEXT,
-#         FOREIGN KEY(email_id) REFERENCES users(email_id) ON DELETE SET NULL
+#         url TEXT
 # )""")
 
 # Create the database table (Users Table)
@@ -29,6 +28,11 @@ c = connect.cursor()
 # )""")
 
 
+
+connect.commit()
+connect.close()
+
+
 # Functions to Insert the users
 def Add_User(full_name, email_id, password, confirm_password):
     conn = sqlite3.connect('users.db')
@@ -37,31 +41,28 @@ def Add_User(full_name, email_id, password, confirm_password):
     conn.commit()
     conn.close()
 
-# c.execute("SELECT * FROM users")
 
 # Function to query all users from database
 def get_user():
     """A function to query user from database"""
+    conn = sqlite3.connect(":memory:")
     conn = sqlite3.connect('users.db')
+    conn.row_factory = sqlite3.Row   
     c = conn.cursor()
     c.execute("SELECT * FROM users")
-    items = c.fetchall()
-    return items
-    
-
-get_user()
-
-
+    items = c.fetchall() 
+    users = []
+    for item in items:
+        users.append(dict(item))
+    return users
 
 
-
-
-
-
-
-
-# Save db changes
-connect.commit()
-
-# Close db connection
-connect.close()
+# Function to add book
+def Add_book_data(id, title, subtitle, authors, image, url):
+    conn = sqlite3.connect('books.db')
+    conn = sqlite3.connect(":memory:")
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    c.execute("INSERT INTO books VALUES(?,?,?,?,?,?)", (id, title, subtitle, authors, image, url))
+    conn.commit()
+    conn.close()
