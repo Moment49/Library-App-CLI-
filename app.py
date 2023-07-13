@@ -4,11 +4,12 @@ import json
 import database
 
 
-# User Class
+# User Class For Input Record
 class User:
     """A class to model the library app user"""
-    def __init__(self, full_name, user_email, password, confirm_password):
+    def __init__(self, userid, full_name, user_email, password, confirm_password):
         """Initialize the user attributes"""
+        self.userid = userid
         self.full_name = full_name
         self.user_email = user_email
         self.password = password
@@ -22,7 +23,7 @@ class User:
         return user_info
     
 
-# Book Class
+# Book Class For Input Record
 class Book:
     """A call to model a book"""
     def __init__(self, book_id, title, subtitle, authors, book_img, book_url):
@@ -41,36 +42,38 @@ class Book:
         self.book_details['image'] = self.book_img
         self.book_details['url'] = self.book_url
         return book_details
+    
 
 
 # List to hold user profile
-users_list = []
+users_list = [{'full_name':'Ibenacho Elvis', 'user_email':'elv@gmail.com', 'password': 'elv123', 'confirm_password':'elv123'}]
 
+# database.Users()
 
 # Call the user_info from db
-users = database.get_user()
-# Iterate over the info from db and push user back to the list
-for user in users:
-    users_list.append(user)
-print(users_list)
+# users = database.get_user()
+# # Iterate over the info from db and push user back to the list
+# for user in users:
+#     users_list.append(user)
+# print(users_list)
 
 
 #List to store all books from API and from the book class
 books_list = []
 
 #Make an API request to an end point to fetch books data
-URL = "https://www.dbooks.org/api/search/all" 
-response = requests.get(URL)
-print(f"Status_code: {response.status_code}")
+# URL = "https://www.dbooks.org/api/search/all" 
+# response = requests.get(URL)
+# print(f"Status_code: {response.status_code}")
 
-# Get access to the response data
-data = response.text
+# # Get access to the response data
+# data = response.text
 
-# Parse or convert the json string to dictionary using the loads() method
-res = json.loads(data)
-for data in res['books']:
-    # Append the book data to the books list
-    books_list.append(data)
+# # Parse or convert the json string to dictionary using the loads() method
+# res = json.loads(data)
+# for data in res['books']:
+#     # Append the book data to the books list
+#     books_list.append(data)
 
 
 
@@ -119,11 +122,18 @@ def main():
                             # Get user input
                             user_action = input("Please select action to perform below: ")
                             if user_action == '1':
-                                print("Displaying All book...")
-                                for book in books_list:
-                                    print(book)
-                                    dashboard_active = False
-                                    active = False 
+                                print("Displaying All user added books...")
+                                session = database.Session()
+                                result =  session.query(database.Books()).all()
+                                for row in result:
+                                    print(row.book_id,  row.title, row.subtitle, row.authors, row.image, row.url)
+                                # for book in books_list:
+                                #     print(book)
+                                # books = database.show_books()
+                                # for book in books:
+                                #     print(book)
+                                dashboard_active = False
+                                active = False 
                             if user_action == '2':
                                 print("Adding book..")
                                 book_no = int(input("ISBN: "))
@@ -137,11 +147,21 @@ def main():
                                 # Add book to books_list
                                 books_list.append(book.Add_book())
                                 # Push book data to db
-                                database.Add_book_data(book_no, book_title, book_subtitle, book_authors, book_image, book_url)
-
+                                session = database.Session()
+                                # user_id_check = session.query(database.Users()).filter(database.Users().email == user_email)
+                                # print(user_id_check)
+                                book1 = database.Books(book_no, book_title, book_subtitle, book_authors, book_image, book_url,book_user=12345)
+                                session.add(book1)
+                                session.commit()
                                 dashboard_active = False 
                             if user_action == '3':
-                                print("Update book..")
+                                print("###Update book###..")
+                                print("Enter book no(ISBN)")
+                                books = database.show_books()
+                                for book in books:
+                                    print(book)
+                                book_no = input("Please Enter Book number: ")
+                                
                                 dashboard_active = False 
                             if user_action == '4':
                                 print("Delete book..")
@@ -172,6 +192,7 @@ def main():
                 else:
                     print("\n##..Create account..##\n")
                     # get the details to create user account
+                    userid = input("Enter userid: ")
                     f_name = input("Enter full_name: ")
                     u_email = input("Enter email: ")
                     u_password = input("Enter password: ")
@@ -187,12 +208,16 @@ def main():
                             print("password does not match")
                     
                     # Creates the user after registering
-                    _user = User(f_name, u_email, u_password, c_password)
+                    _user = User(userid, f_name, u_email, u_password, c_password)
                     # Appends user to the list
                     users_list.append(_user.create_profile())
 
                     # Push users to the database(users)
-                    database.Add_User(f_name, u_email, u_password, c_password)
+                    # database.Add_User(f_name, u_email, u_password, c_password)
+                    user = database.Users(userid, f_name, u_email, u_password, c_password)
+                    session = database.Session()
+                    session.add(user)
+                    session.commit()
                     print("\nCreating user...")
                     print("Sign up successful...")
                     user_isValid = False 
