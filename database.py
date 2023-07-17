@@ -4,10 +4,11 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 
-
+# Base class Obj
 base = declarative_base()
 
 # Define the db class model
+# Users Model
 class Users(base):
     __tablename__ = "users"
     userid = Column("userId", String, primary_key=True)
@@ -15,17 +16,9 @@ class Users(base):
     user_email = Column("user_email", String)
     password = Column("password", String)
     confirm_password = Column("confirm_password", String) 
-
-    def __init__(self, userid, full_name, user_email, password, confirm_password):
-        self.userid = userid
-        self.full_name = full_name
-        self.user_email = user_email
-        self.password = password
-        self.confirm_password = confirm_password
     
     def __repr__(self):
-        return f"({self.full_name}),{self.user_email}, {self.password}, {self.confirm_password}"
-
+        return f"{self.full_name},{self.user_email}, {self.password}, {self.confirm_password}"
 
 # Book MODEL
 class Books(base):
@@ -38,24 +31,16 @@ class Books(base):
     url = Column('url', String)
     book_user = Column(String, ForeignKey(Users.userid))
 
-    def __init__(self, book_id, title, subtitle, authors, image, url, book_user):
-        self.book_id = book_id
-        self.title = title
-        self.subtitle = subtitle
-        self.authors = authors
-        self.image = image
-        self.url = url 
-        self.book_user = book_user
-
     def __repr__(self):
         return f"{self.book.id} {self.title}{self.authors} {self.book_user}"
     
 
 
-
+# Create the db engine and instantiate a connection
 engine = create_engine("sqlite:///users.db", echo=True)
 base.metadata.create_all(bind=engine)
 
+# Create session obj to handle db operations
 Session = sessionmaker(bind=engine)
 
 

@@ -16,6 +16,7 @@ class User:
         self.confirm_password = confirm_password
     def create_profile(self, **user_info):
         self.user_info = user_info
+        self.user_info['user_id'] = self.userid
         self.user_info['full_name'] = self.full_name
         self.user_info['user_email'] = self.user_email
         self.user_info['password'] = self.password
@@ -44,12 +45,7 @@ class Book:
         return book_details
     
 
-
-# List to hold user profile
-users_list = [{'full_name':'Ibenacho Elvis', 'user_email':'elv@gmail.com', 'password': 'elv123', 'confirm_password':'elv123'}]
-
 # database.Users()
-
 # Call the user_info from db
 # users = database.get_user()
 # # Iterate over the info from db and push user back to the list
@@ -75,7 +71,13 @@ books_list = []
 #     # Append the book data to the books list
 #     books_list.append(data)
 
+# Get the data from db
+session = database.Session()
+result = session.query(database.Users).all()
+print(result)
 
+# List to hold user profile
+users_list = [{'user_id':12345, 'full_name':'Ibenacho Elvis', 'user_email':'elv@gmail.com', 'password': 'elv123', 'confirm_password':'elv123'}]
 
 # Main Program
 def main():
@@ -142,16 +144,15 @@ def main():
                                 book_authors = input("Book authors: ")
                                 book_image = input("Book image_url: ")
                                 book_url = input("Book url: ")
-                                book = Book(book_no, book_title, book_subtitle, book_authors, book_image, book_url)
+                                book = Book(book_no, book_title, book_subtitle, book_authors, book_image, book_url, book_user=12345)
                                 
                                 # Add book to books_list
                                 books_list.append(book.Add_book())
                                 # Push book data to db
                                 session = database.Session()
-                                # user_id_check = session.query(database.Users()).filter(database.Users().email == user_email)
-                                # print(user_id_check)
-                                book1 = database.Books(book_no, book_title, book_subtitle, book_authors, book_image, book_url,book_user=12345)
-                                session.add(book1)
+                                
+                                book = database.Books(book_id=book_no, title=book_title, subtitle=book_subtitle, authors=book_authors, image=book_image, url=book_url, book_user=12345)
+                                session.add(book)
                                 session.commit()
                                 dashboard_active = False 
                             if user_action == '3':
@@ -214,7 +215,7 @@ def main():
 
                     # Push users to the database(users)
                     # database.Add_User(f_name, u_email, u_password, c_password)
-                    user = database.Users(userid, f_name, u_email, u_password, c_password)
+                    user = database.Users(userid=userid, full_name=f_name, user_email=u_email, password=u_password, confirm_password = c_password)
                     session = database.Session()
                     session.add(user)
                     session.commit()
