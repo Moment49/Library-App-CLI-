@@ -77,7 +77,7 @@ result = session.query(database.Users).all()
 print(result)
 
 # List to hold user profile
-users_list = [{'user_id':12345, 'full_name':'Ibenacho Elvis', 'user_email':'elv@gmail.com', 'password': 'elv123', 'confirm_password':'elv123'}]
+users_list = [{'user_id':'12345', 'full_name':'Ibenacho Elvis', 'user_email':'elv@gmail.com', 'password': 'elv123', 'confirm_password':'elv123'}]
 
 # Main Program
 def main():
@@ -93,16 +93,18 @@ def main():
         main_prompt += f"3 - Exit the application \n"
         main_prompt += "Please select 1, 2 or 3 to proceed: "
         user_response = input(main_prompt)
+
+        # Login Into Account
         if user_response == '1':
             print("\n...Login details...\n")
             log_active = True
             while log_active:
                 #Get user email and password
-                user_email = input("Enter email: ")
+                user_id = input("Enter User_id: ")
                 user_password = input("Enter password: ")
                 for user in users_list:
                     # Check if users has already created account
-                    if user_email in user.values() and user_password in user.values():
+                    if user_id in user.values() and user_password in user.values():
                         # Stop the main and login_active loop once email and password verified
                         # active = False 
                         log_active = False
@@ -124,16 +126,11 @@ def main():
                             # Get user input
                             user_action = input("Please select action to perform below: ")
                             if user_action == '1':
-                                print("Displaying All user added books...")
                                 session = database.Session()
-                                result =  session.query(database.Books()).all()
-                                for row in result:
-                                    print(row.book_id,  row.title, row.subtitle, row.authors, row.image, row.url)
-                                # for book in books_list:
-                                #     print(book)
-                                # books = database.show_books()
-                                # for book in books:
-                                #     print(book)
+                                book_details =  session.query(database.Books).filter(database.Books.book_user==user_id) 
+                                for book in book_details:
+                                    print("\nShow all books...\n")
+                                    print(f"'Book ISBN': {book.book_id}\n 'Book Title': {book.title}\n 'Book Subtitle': {book.subtitle}\n 'Book Authors': {book.authors}\n 'Book Image': {book.image}\n 'Book URL': {book.url}")
                                 dashboard_active = False
                                 active = False 
                             if user_action == '2':
@@ -175,11 +172,12 @@ def main():
                                 dashboard_active = False 
                                 active = True
 
-                    elif user_email not in user.values() and user_password not in user.values():
+                    elif user_id not in user.values() and user_password not in user.values():
                         print('User not found!! Please create account')
                     else:
-                        print("Invalid email or password")
-                
+                        print("Invalid user_id or password")
+
+        #Create an account 
         elif user_response == '2':
             user_isValid = True
             while user_isValid:
@@ -207,22 +205,19 @@ def main():
                         c_password = input("Enter confirm_password: ")
                         if u_password != c_password:
                             print("password does not match")
-                    
-                    # Creates the user after registering
+                    # Creates the user after registering & Appends user to the list
                     _user = User(userid, f_name, u_email, u_password, c_password)
-                    # Appends user to the list
                     users_list.append(_user.create_profile())
 
-                    # Push users to the database(users)
-                    # database.Add_User(f_name, u_email, u_password, c_password)
+                    # Push user records to database
                     user = database.Users(userid=userid, full_name=f_name, user_email=u_email, password=u_password, confirm_password = c_password)
                     session = database.Session()
                     session.add(user)
                     session.commit()
-                    print("\nCreating user...")
                     print("Sign up successful...")
                     user_isValid = False 
                     active = False
+
                     dashboard_active = True
                     while dashboard_active:
                         em_show = emoji.emojize("📚")
@@ -239,8 +234,12 @@ def main():
                         # Get user input
                         user_action = input("Please select action to perform below: ")
                         if user_action == '1':
-                            for book in books_list:
-                                print(book)
+                            # Will write a logic to check if there are any books if not write books empty
+                            session = database.Session()
+                            book_details =  session.query(database.Books).filter(database.Books.book_user==user_id) 
+                            for book in book_details:
+                                print("\nShow all books...\n")
+                                print(f"'Book ISBN': {book.book_id}\n 'Book Title': {book.title}\n 'Book Subtitle': {book.subtitle}\n 'Book Authors': {book.authors}\n 'Book Image': {book.image}\n 'Book URL': {book.url}")
                             dashboard_active = False
                         if user_action == '2':
                             print("Adding book..")
@@ -258,12 +257,12 @@ def main():
                             print("Logging out..")
                             dashboard_active = False 
 
+        # Exit Program
         elif user_response == '3':
             # To terminate the main program
             active = False                
         else:
             print("Sorry, please select a valid option")
-
 
 
 if __name__ == '__main__':
