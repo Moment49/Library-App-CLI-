@@ -1,7 +1,8 @@
 # Database Using an ORM-SQLALCHEMY
 from sqlalchemy import create_engine, Column, String, Integer, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, relationship
+
 
 
 # Base class Obj
@@ -11,14 +12,15 @@ base = declarative_base()
 # Users Model
 class Users(base):
     __tablename__ = "users"
-    userid = Column("userId", String, primary_key=True)
+    userId = Column("userId", String, primary_key=True)
     full_name = Column("full_name", String, nullable=False)
     user_email = Column("user_email", String)
     password = Column("password", String)
     confirm_password = Column("confirm_password", String) 
+    books = relationship('Books', backref='book_creator')
     
     def __repr__(self):
-        return f"{self.full_name},{self.user_email}, {self.password}, {self.confirm_password}"
+        return f"userId:{self.userId} full_name:{self.full_name} user_email:{self.user_email} password:{self.password} confirm_password:{self.confirm_password} "
 
 # Book MODEL
 class Books(base):
@@ -29,19 +31,19 @@ class Books(base):
     authors = Column('authors', String)
     image = Column('image', String)
     url = Column('url', String)
-    book_user = Column(String, ForeignKey(Users.userid))
+    book_user_id = Column(String, ForeignKey('users.userId'))
 
     def __repr__(self):
-        return f"{self.book.id} {self.title}{self.authors} {self.book_user}"
+        return f"{self.book_id} {self.title}{self.authors} {self.book_user_id}"
     
 
 
 # Create the db engine and instantiate a connection
 engine = create_engine("sqlite:///users.db", echo=True)
 base.metadata.create_all(bind=engine)
-
 # Create session obj to handle db operations
 Session = sessionmaker(bind=engine)
+session = Session()
 
 
 

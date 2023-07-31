@@ -1,7 +1,7 @@
 import emoji
 import requests
 import json
-import database
+from database import Users, Books, session
 
 
 # User Class For Input Record
@@ -45,15 +45,6 @@ class Book:
         return book_details
     
 
-# database.Users()
-# Call the user_info from db
-# users = database.get_user()
-# # Iterate over the info from db and push user back to the list
-# for user in users:
-#     users_list.append(user)
-# print(users_list)
-
-
 #List to store all books from API and from the book class
 books_list = []
 
@@ -72,12 +63,12 @@ books_list = []
 #     books_list.append(data)
 
 # Get the data from db
-session = database.Session()
-result = session.query(database.Users).all()
+result = session.query(Users).all()
 print(result)
 
+
 # List to hold user profile
-users_list = [{'user_id':'12345', 'full_name':'Ibenacho Elvis', 'user_email':'elv@gmail.com', 'password': 'elv123', 'confirm_password':'elv123'}]
+users_list = []
 
 # Main Program
 def main():
@@ -102,80 +93,74 @@ def main():
                 #Get user email and password
                 user_id = input("Enter User_id: ")
                 user_password = input("Enter password: ")
-                for user in users_list:
-                    # Check if users has already created account
-                    if user_id in user.values() and user_password in user.values():
-                        # Stop the main and login_active loop once email and password verified
-                        # active = False 
-                        log_active = False
-                        dashboard_active = True
-                        while dashboard_active:
-                            print('found user!!! Login successful')
-                            em_show = emoji.emojize("📚")
-                            em_add = emoji.emojize("📖")
-                            em_update = emoji.emojize("📗")
-                            em_delete = emoji.emojize("📕")
-                            print(f"\n...Welcome Back - {user['full_name']}\n")
-                            print(f"1 - Show all books {em_show}{em_show} ")
-                            print(f"2 - Add a book{em_add}")
-                            print(f"3 - Update a book{em_update}")
-                            print(f"4 - Delete a book{em_delete}")
-                            print("5 - Search for a book")
-                            print("6 - Logout")
+                user = session.query(Users).filter(Users.userId==user_id, Users.password==user_password).first()
 
-                            # Get user input
-                            user_action = input("Please select action to perform below: ")
-                            if user_action == '1':
-                                session = database.Session()
-                                book_details =  session.query(database.Books).filter(database.Books.book_user==user_id) 
-                                for book in book_details:
-                                    print("\nShow all books...\n")
-                                    print(f"'Book ISBN': {book.book_id}\n 'Book Title': {book.title}\n 'Book Subtitle': {book.subtitle}\n 'Book Authors': {book.authors}\n 'Book Image': {book.image}\n 'Book URL': {book.url}")
-                                dashboard_active = False
-                                active = False 
-                            if user_action == '2':
-                                print("Adding book..")
-                                book_no = int(input("ISBN: "))
-                                book_title = input("Book title: ")
-                                book_subtitle = input("Book subtitle: ")
-                                book_authors = input("Book authors: ")
-                                book_image = input("Book image_url: ")
-                                book_url = input("Book url: ")
-                                book = Book(book_no, book_title, book_subtitle, book_authors, book_image, book_url, book_user=12345)
-                                
-                                # Add book to books_list
-                                books_list.append(book.Add_book())
-                                # Push book data to db
-                                session = database.Session()
-                                
-                                book = database.Books(book_id=book_no, title=book_title, subtitle=book_subtitle, authors=book_authors, image=book_image, url=book_url, book_user=12345)
-                                session.add(book)
-                                session.commit()
-                                dashboard_active = False 
-                            if user_action == '3':
-                                print("###Update book###..")
-                                print("Enter book no(ISBN)")
-                                books = database.show_books()
-                                for book in books:
-                                    print(book)
-                                book_no = input("Please Enter Book number: ")
-                                
-                                dashboard_active = False 
-                            if user_action == '4':
-                                print("Delete book..")
-                                dashboard_active = False 
-                            if user_action == '5':
-                                print("Adding book..")
-                                dashboard_active = False 
-                            if user_action == '6':
-                                print("Logging out..")
-                                dashboard_active = False 
-                                active = True
+                if user is not None:
+                    # Stop the main and login_active loop once email and password verified
+                    # active = False 
+                    log_active = False
+                    dashboard_active = True
+                    while dashboard_active:
+                        print('found user!!! Login successful')
+                        em_show = emoji.emojize("📚")
+                        em_add = emoji.emojize("📖")
+                        em_update = emoji.emojize("📗")
+                        em_delete = emoji.emojize("📕")
+                        print(f"\n...Welcome Back - {user.full_name}\n")
+                        print(f"1 - Show all books {em_show}{em_show} ")
+                        print(f"2 - Add a book{em_add}")
+                        print(f"3 - Update a book{em_update}")
+                        print(f"4 - Delete a book{em_delete}")
+                        print("5 - Search for a book")
+                        print("6 - Logout")
 
-                    elif user_id not in user.values() and user_password not in user.values():
-                        print('User not found!! Please create account')
-                    else:
-                        print("Invalid user_id or password")
+                        # Get user input
+                        user_action = input("Please select action to perform below: ")
+                        if user_action == '1':
+                            book_details =  session.query(Books).filter(Books.book_user_id==user_id) 
+                            for book in book_details:
+                                print("\nShow all books...\n")
+                                print(f"'Book ISBN': {book.book_id}\n 'Book Title': {book.title}\n 'Book Subtitle': {book.subtitle}\n 'Book Authors': {book.authors}\n 'Book Image': {book.image}\n 'Book URL': {book.url}")
+                            dashboard_active = False
+                            active = False 
+                        if user_action == '2':
+                            print("Adding book..")
+                            booker = result.userId
+                            book_no = int(input("ISBN: "))
+                            book_title = input("Book title: ")
+                            book_subtitle = input("Book subtitle: ")
+                            book_authors = input("Book authors: ")
+                            book_image = input("Book image_url: ")
+                            book_url = input("Book url: ")
+                            book = Book(book_no, book_title, book_subtitle, book_authors, book_image, book_url,
+                                            book_user_id=booker)
+                            
+                            # Add book to books_list
+                            books_list.append(book.Add_book())
+                            # Push book data to db
+                            book = Books(book_id=book_no, title=book_title, subtitle=book_subtitle, 
+                                            authors=book_authors, image=book_image, url=book_url, book_user_id=booker)
+                            session.add(book)
+                            session.commit()
+                            dashboard_active = False 
+                        if user_action == '3':
+                            print("###Update book###..")
+                            print("Enter book no(ISBN)")
+                            dashboard_active = False 
+                        if user_action == '4':
+                            print("Delete book..")
+                            dashboard_active = False 
+                        if user_action == '5':
+                            print("Adding book..")
+                            dashboard_active = False 
+                        if user_action == '6':
+                            print("Logging out..")
+                            dashboard_active = False 
+                            active = True
+                elif user is None:
+                    print('User not found!! Please create account')
+                else:
+                    print("Invalid user_id or password")
 
         #Create an account 
         elif user_response == '2':
@@ -210,8 +195,7 @@ def main():
                     users_list.append(_user.create_profile())
 
                     # Push user records to database
-                    user = database.Users(userid=userid, full_name=f_name, user_email=u_email, password=u_password, confirm_password = c_password)
-                    session = database.Session()
+                    user = Users(userId=userid, full_name=f_name, user_email=u_email, password=u_password, confirm_password = c_password)
                     session.add(user)
                     session.commit()
                     print("Sign up successful...")
@@ -235,8 +219,7 @@ def main():
                         user_action = input("Please select action to perform below: ")
                         if user_action == '1':
                             # Will write a logic to check if there are any books if not write books empty
-                            session = database.Session()
-                            book_details =  session.query(database.Books).filter(database.Books.book_user==user_id) 
+                            book_details =  session.query(Books).filter(Books.book_user_id==user_id) 
                             for book in book_details:
                                 print("\nShow all books...\n")
                                 print(f"'Book ISBN': {book.book_id}\n 'Book Title': {book.title}\n 'Book Subtitle': {book.subtitle}\n 'Book Authors': {book.authors}\n 'Book Image': {book.image}\n 'Book URL': {book.url}")
