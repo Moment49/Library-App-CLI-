@@ -112,7 +112,7 @@ def main():
                         print(f"2 - Add a book{em_add}")
                         print(f"3 - Update a book{em_update}")
                         print(f"4 - Delete a book{em_delete}")
-                        print("5 - Search for a book")
+                        print("5  - Search for a book")
                         print("6 - Generate book QR-CODE")
                         print("7 - Logout")
 
@@ -164,15 +164,31 @@ def main():
                             
                             # Update the book based on the Isbn selected
                             print("Please Enter an ISBN to update")
-                            isbn_update = input("ISBN: ")
-                            book_update = session.query(Books).filter(Books.book_id==isbn_update).first()
+                            isbn_ = input("ISBN: ")
+                            book_update = session.query(Books).filter(Books.book_id==isbn_).first()
                             if book_update is not None:
-                                # if book_update Isbn exists get user new book details and update
-                                # else return not a match on isbn.
-                                pass
+                                isbn_update = input("Enter new ISBN: ")
+                                title_update = input("Book title: ")
+                                subtitle_update = input("Book subtitle: ")
+                                authors_update = input("Book authors: ")
+                                image_update = input("Book image_url: ")
+                                url_update = input("Book url: ")
+
+                                # Update the book details
+                                x = session.query(Books).get(isbn_)
+                                x.book_id = isbn_update
+                                x.title = title_update
+                                x.subtitle = subtitle_update
+                                x.authors = authors_update
+                                x.image = image_update
+                                x.url = url_update
+                                # Commit your changes
+                                session.commit()
+                                print("Book updated...")
+                                dashboard_active = False 
                             else:
-                                pass
-                            dashboard_active = False 
+                                print("Invalid Isbn or Book does not exist")
+                                dashboard_active = False 
                         if user_action == '4':
                             print("<<<DELETE BOOK>>>")
                             user = session.query(Users).filter(Users.userId == user_id).first()
@@ -182,8 +198,24 @@ def main():
                                 print(f"ISBN: {user_book.book_id}\nTitle:{user_book.title}\nAuthors: {user_book.authors}\nBook_URL: {user_book.url}\n")
 
                             dashboard_active = False 
+                             # Delete a book based on the Isbn selected
+                            print("Please Enter an book Isbn to delete")
+                            isbn_ = input("ISBN: ")
+                            book_delete = session.query(Books).get(isbn_)
+                            session.delete(book_delete)
+                            session.commit()
+                            print("Book deleted...")
+
                         if user_action == '5':
-                            print(" Search for book..")
+                            search_active = True
+                            while search_active:        
+                                print("<<<Search for book>>>")
+                                print("Please select a search term")
+                                print(f"1 - Search by Authors ")
+                                print(f"2 - Search by Title ")
+                                print(f"3 - Search by Subtitle ")
+                                print(f"4 - Search by Isbn number ")
+
                             dashboard_active = False 
                         if user_action == '6':
                             print("Logging out..")
@@ -281,43 +313,6 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

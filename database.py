@@ -15,7 +15,7 @@ class Users(Base):
     user_email = Column("user_email", String)
     password = Column("password", String)
     confirm_password = Column("confirm_password", String) 
-    books = relationship('Books', backref='book_creator')
+    books = relationship('Books', backref='book_creator', cascade="all, delete")
     
     def __repr__(self):
         return f"userId:{self.userId} full_name:{self.full_name} user_email:{self.user_email} password:{self.password} confirm_password:{self.confirm_password} "
@@ -36,7 +36,7 @@ class Books(Base):
     
 
 # Create the db engine and instantiate a connection
-engine = create_engine("sqlite:///users.db", echo=False)
+engine = create_engine("sqlite:///users.db", echo=True)
 Base.metadata.create_all(bind=engine)
 # Create session obj to handle db operations
 Session = sessionmaker(bind=engine)
