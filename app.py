@@ -62,6 +62,7 @@ books_list = []
 #     # Append the book data to the books list
 #     books_list.append(data)
 
+# print(books_list)
 # Get the data from db
 result = session.query(Users).all()
 print(result)
@@ -112,55 +113,85 @@ def main():
                         print(f"3 - Update a book{em_update}")
                         print(f"4 - Delete a book{em_delete}")
                         print("5 - Search for a book")
-                        print("6 - Logout")
+                        print("6 - Generate book QR-CODE")
+                        print("7 - Logout")
 
                         # Get user input
                         user_action = input("Please select action to perform below: ")
                         if user_action == '1':
-                            book_details =  session.query(Books).filter(Books.book_user_id==user_id) 
-                            for book in book_details:
-                                print("\nShow all books...\n")
-                                print(f"'Book ISBN': {book.book_id}\n 'Book Title': {book.title}\n 'Book Subtitle': {book.subtitle}\n 'Book Authors': {book.authors}\n 'Book Image': {book.image}\n 'Book URL': {book.url}")
-                            dashboard_active = False
-                            active = False 
+                            book_details =  session.query(Books).filter(Books.book_user_id==user_id).first() 
+                            if book_details is None:
+                                print('<<<No books to show>>>')     
+                                dashboard_active = False
+                                active = False
+                            else:
+                                for book in book_details:
+                                    print("\n<<<Show all books>>>\n")
+                                    print(f"'Book ISBN': {book.book_id}\n 'Book Title': {book.title}\n \'Book Subtitle': {book.subtitle}\n \
+                                        'Book Authors': {book.authors}\n 'Book Image': {book.image}\n 'Book URL': {book.url}")
+                                dashboard_active = False
+    
                         if user_action == '2':
-                            print("Adding book..")
-                            booker = result.userId
+                            print("<<<ADD BOOK>>>")
                             book_no = int(input("ISBN: "))
                             book_title = input("Book title: ")
                             book_subtitle = input("Book subtitle: ")
                             book_authors = input("Book authors: ")
                             book_image = input("Book image_url: ")
                             book_url = input("Book url: ")
-                            book = Book(book_no, book_title, book_subtitle, book_authors, book_image, book_url,
-                                            book_user_id=booker)
+                            # Create a book Object
+                            book = Book(book_no, book_title, book_subtitle, book_authors, book_image, book_url)
                             
-                            # Add book to books_list
+                            # Add book  Object to books_list
                             books_list.append(book.Add_book())
+
                             # Push book data to db
                             book = Books(book_id=book_no, title=book_title, subtitle=book_subtitle, 
-                                            authors=book_authors, image=book_image, url=book_url, book_user_id=booker)
+                                            authors=book_authors, image=book_image, url=book_url, book_creator=user)
                             session.add(book)
                             session.commit()
+                            print("Book Added")
                             dashboard_active = False 
+                            active = False
+
                         if user_action == '3':
-                            print("###Update book###..")
-                            print("Enter book no(ISBN)")
+                            print("<<<UPDATE BOOK>>>")
+                            user = session.query(Users).filter(Users.userId == user_id).first()
+                            user_books = user.books
+                            print(">>>List of All books<<<")
+                            for user_book in user_books:
+                                print(f"ISBN: {user_book.book_id}\nTitle:{user_book.title}\nAuthors: {user_book.authors}\nBook_URL: {user_book.url}\n")
+                            
+                            # Update the book based on the Isbn selected
+                            print("Please Enter an ISBN to update")
+                            isbn_update = input("ISBN: ")
+                            book_update = session.query(Books).filter(Books.book_id==isbn_update).first()
+                            if book_update is not None:
+                                # if book_update Isbn exists get user new book details and update
+                                # else return not a match on isbn.
+                                pass
+                            else:
+                                pass
                             dashboard_active = False 
                         if user_action == '4':
-                            print("Delete book..")
+                            print("<<<DELETE BOOK>>>")
+                            user = session.query(Users).filter(Users.userId == user_id).first()
+                            user_books = user.books
+                            print(">>>List of All books<<<")
+                            for user_book in user_books:
+                                print(f"ISBN: {user_book.book_id}\nTitle:{user_book.title}\nAuthors: {user_book.authors}\nBook_URL: {user_book.url}\n")
+
                             dashboard_active = False 
                         if user_action == '5':
-                            print("Adding book..")
+                            print(" Search for book..")
                             dashboard_active = False 
                         if user_action == '6':
                             print("Logging out..")
                             dashboard_active = False 
                             active = True
-                elif user is None:
-                    print('User not found!! Please create account')
                 else:
                     print("Invalid user_id or password")
+
 
         #Create an account 
         elif user_response == '2':
@@ -234,7 +265,7 @@ def main():
                             print("Delete book..")
                             dashboard_active = False 
                         if user_action == '5':
-                            print("Adding book..")
+                            print("Search for a book..")
                             dashboard_active = False 
                         if user_action == '6':
                             print("Logging out..")

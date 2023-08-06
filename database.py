@@ -4,13 +4,11 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 
 
-
 # Base class Obj
-base = declarative_base()
+Base = declarative_base()
 
-# Define the db class model
 # Users Model
-class Users(base):
+class Users(Base):
     __tablename__ = "users"
     userId = Column("userId", String, primary_key=True)
     full_name = Column("full_name", String, nullable=False)
@@ -23,7 +21,7 @@ class Users(base):
         return f"userId:{self.userId} full_name:{self.full_name} user_email:{self.user_email} password:{self.password} confirm_password:{self.confirm_password} "
 
 # Book MODEL
-class Books(base):
+class Books(Base):
     __tablename__ = 'books'
     book_id = Column("book_id", Integer, primary_key=True)
     title = Column('title', String)
@@ -34,13 +32,12 @@ class Books(base):
     book_user_id = Column(String, ForeignKey('users.userId'))
 
     def __repr__(self):
-        return f"{self.book_id} {self.title}{self.authors} {self.book_user_id}"
+        return f"{self.book_id} {self.title} {self.subtitle} {self.image} {self.url} {self.authors} {self.book_user_id}"
     
 
-
 # Create the db engine and instantiate a connection
-engine = create_engine("sqlite:///users.db", echo=True)
-base.metadata.create_all(bind=engine)
+engine = create_engine("sqlite:///users.db", echo=False)
+Base.metadata.create_all(bind=engine)
 # Create session obj to handle db operations
 Session = sessionmaker(bind=engine)
 session = Session()
