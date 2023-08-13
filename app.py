@@ -1,6 +1,7 @@
 import emoji
 import requests
 import json
+import qrcode
 from database import Users, Books, session
 
 
@@ -44,7 +45,6 @@ class Book:
         self.book_details['url'] = self.book_url
         return book_details
     
-
 #List to store all books from API and from the book class
 books_list = []
 
@@ -130,7 +130,6 @@ def main():
                                     print(f"'Book ISBN': {book.book_id}\n 'Book Title': {book.title}\n \'Book Subtitle': {book.subtitle}\n \
                                         'Book Authors': {book.authors}\n 'Book Image': {book.image}\n 'Book URL': {book.url}")
                                 dashboard_active = False
-    
                         if user_action == '2':
                             print("<<<ADD BOOK>>>")
                             book_no = int(input("ISBN: "))
@@ -197,7 +196,6 @@ def main():
                             for user_book in user_books:
                                 print(f"ISBN: {user_book.book_id}\nTitle:{user_book.title}\nAuthors: {user_book.authors}\nBook_URL: {user_book.url}\n")
 
-                            dashboard_active = False 
                              # Delete a book based on the Isbn selected
                             print("Please Enter an book Isbn to delete")
                             isbn_ = input("ISBN: ")
@@ -205,6 +203,7 @@ def main():
                             session.delete(book_delete)
                             session.commit()
                             print("Book deleted...")
+                            dashboard_active = False 
 
                         if user_action == '5':
                             search_active = True
@@ -216,15 +215,42 @@ def main():
                                 print(f"3 - Search by Subtitle ")
                                 print(f"4 - Search by Isbn number ")
 
-                            dashboard_active = False 
+                                user_select = input("Please select an action to perform: ")
+                                if user_select == '1':
+                                    print("search by Authors")
+                                    search_author = input("Search authors...: ")
+                                    search_results = session.query(Books).filter(Books.authors.like(f"%{search_author}"))
+                                    for row in search_results:
+                                        print(f"ISBN: {row.book_id}\n Title: {row.title}\n Subtitle: {row.subtitle}\n Authors: {row.authors}\n Image: {row.image}\n Url: {row.url}")
+                                elif user_select == '2':
+                                    print("search by Title")
+                                    search_title = input("Search title...: ")
+                                    search_results = session.query(Books).filter(Books.title.like(f"%{search_title}"))
+                                    for row in search_results:
+                                        print(f"ISBN: {row.book_id}\n Title: {row.title}\n Subtitle: {row.subtitle}\n Authors: {row.authors}\n Image: {row.image}\n Url: {row.url}")
+                                elif user_select == '3':
+                                    print("search by Subtitle")
+                                    search_title = input("Search Subtitle...: ")
+                                    search_results = session.query(Books).filter(Books.title.like(f"%{search_title}"))
+                                    for row in search_results:
+                                        print(f"ISBN: {row.book_id}\n Title: {row.title}\n Subtitle: {row.subtitle}\n Authors: {row.authors}\n Image: {row.image}\n Url: {row.url}")
+                                elif user_select == '4':
+                                    print("Search by Isbn number")
+                                    search_title = input("Search Isbn...: ")
+                                    search_results = session.query(Books).filter(Books.title.like(f"%{search_title}"))
+                                    for row in search_results:
+                                        print(f"ISBN: {row.book_id}\n Title: {row.title}\n Subtitle: {row.subtitle}\n Authors: {row.authors}\n Image: {row.image}\n Url: {row.url}")
+                                dashboard_active = False 
+                                search_active = False
                         if user_action == '6':
+                            print("Generate QR-Code")
+                        if user_action == '7':
                             print("Logging out..")
+                            print("Please Login...")
                             dashboard_active = False 
-                            active = True
+                            log_active = True
                 else:
                     print("Invalid user_id or password")
-
-
         #Create an account 
         elif user_response == '2':
             user_isValid = True
@@ -264,7 +290,6 @@ def main():
                     print("Sign up successful...")
                     user_isValid = False 
                     active = False
-
                     dashboard_active = True
                     while dashboard_active:
                         em_show = emoji.emojize("📚")
@@ -277,31 +302,143 @@ def main():
                         print(f"3 - Update a book{em_update}")
                         print(f"4 - Delete a book{em_delete}")
                         print("5 - Search for a book")
-                        print("6 - Logout")
+                        print("6 - Generate book QR-CODE")
+                        print("7 - Logout")
                         # Get user input
                         user_action = input("Please select action to perform below: ")
                         if user_action == '1':
                             # Will write a logic to check if there are any books if not write books empty
-                            book_details =  session.query(Books).filter(Books.book_user_id==user_id) 
-                            for book in book_details:
-                                print("\nShow all books...\n")
-                                print(f"'Book ISBN': {book.book_id}\n 'Book Title': {book.title}\n 'Book Subtitle': {book.subtitle}\n 'Book Authors': {book.authors}\n 'Book Image': {book.image}\n 'Book URL': {book.url}")
-                            dashboard_active = False
+                            book_details =  session.query(Books).filter(Books.book_user_id==userid) .first()
+                            if book_details is None:
+                                print('<<<No books to show>>>')     
+                                dashboard_active = False
+                                active = False
+                            if book_details is not None:
+                                for book in book_details:
+                                    print("\n<<<Show all books>>>\n")
+                                    print(f"'Book ISBN': {book.book_id}\n 'Book Title': {book.title}\n \'Book Subtitle': {book.subtitle}\n \
+                                        'Book Authors': {book.authors}\n 'Book Image': {book.image}\n 'Book URL': {book.url}")
+                                dashboard_active = False
                         if user_action == '2':
-                            print("Adding book..")
+                            print("<<<ADD BOOK>>>")
+                            book_no = int(input("ISBN: "))
+                            book_title = input("Book title: ")
+                            book_subtitle = input("Book subtitle: ")
+                            book_authors = input("Book authors: ")
+                            book_image = input("Book image_url: ")
+                            book_url = input("Book url: ")
+                            # Create a book Object
+                            book = Book(book_no, book_title, book_subtitle, book_authors, book_image, book_url)
+                            
+                            # Add book  Object to books_list
+                            books_list.append(book.Add_book())
+
+                            # Push book data to db
+                            book = Books(book_id=book_no, title=book_title, subtitle=book_subtitle, 
+                                            authors=book_authors, image=book_image, url=book_url, book_creator=user)
+                            session.add(book)
+                            session.commit()
+                            print("Book Added")
+                            dashboard_active = False 
+                            active = False
+ 
                             dashboard_active = False 
                         if user_action == '3':
-                            print("Update book..")
+                            print("<<<UPDATE BOOK>>>")
+                            user = session.query(Users).filter(Users.userId == userid).first()
+                            user_books = user.books
+                            print(">>>List of All books<<<")
+                            for user_book in user_books:
+                                print(f"ISBN: {user_book.book_id}\nTitle:{user_book.title}\nAuthors: {user_book.authors}\nBook_URL: {user_book.url}\n")
+                            
+                            # Update the book based on the Isbn selected
+                            print("Please Enter an ISBN to update")
+                            isbn_ = input("ISBN: ")
+                            book_update = session.query(Books).filter(Books.book_id==isbn_).first()
+                            if book_update is not None:
+                                isbn_update = input("Enter new ISBN: ")
+                                title_update = input("Book title: ")
+                                subtitle_update = input("Book subtitle: ")
+                                authors_update = input("Book authors: ")
+                                image_update = input("Book image_url: ")
+                                url_update = input("Book url: ")
+
+                                # Update the book details
+                                x = session.query(Books).get(isbn_)
+                                x.book_id = isbn_update
+                                x.title = title_update
+                                x.subtitle = subtitle_update
+                                x.authors = authors_update
+                                x.image = image_update
+                                x.url = url_update
+                                # Commit your changes
+                                session.commit()
+                                print("Book updated...")
+                                dashboard_active = False 
+                            else:
+                                print("Invalid Isbn or Book does not exist")
+                                dashboard_active = False 
                             dashboard_active = False 
                         if user_action == '4':
-                            print("Delete book..")
+                            print("<<<DELETE BOOK>>>")
+                            user = session.query(Users).filter(Users.userId == user_id).first()
+                            user_books = user.books
+                            print(">>>List of All books<<<")
+                            for user_book in user_books:
+                                print(f"ISBN: {user_book.book_id}\nTitle:{user_book.title}\nAuthors: {user_book.authors}\nBook_URL: {user_book.url}\n")
+
+                             # Delete a book based on the Isbn selected
+                            print("Please Enter an book Isbn to delete")
+                            isbn_ = input("ISBN: ")
+                            book_delete = session.query(Books).get(isbn_)
+                            session.delete(book_delete)
+                            session.commit()
+                            print("Book deleted...")
                             dashboard_active = False 
                         if user_action == '5':
-                            print("Search for a book..")
-                            dashboard_active = False 
+                            search_active = True
+                            while search_active:        
+                                print("<<<Search for book>>>")
+                                print("Please select a search term")
+                                print(f"1 - Search by Authors ")
+                                print(f"2 - Search by Title ")
+                                print(f"3 - Search by Subtitle ")
+                                print(f"4 - Search by Isbn number ")
+
+                                user_select = input("Please select an action to perform: ")
+                                if user_select == '1':
+                                    print("search by Authors")
+                                    search_author = input("Search authors...: ")
+                                    search_results = session.query(Books).filter(Books.authors.like(f"%{search_author}"))
+                                    for row in search_results:
+                                        print(f"ISBN: {row.book_id}\n Title: {row.title}\n Subtitle: {row.subtitle}\n Authors: {row.authors}\n Image: {row.image}\n Url: {row.url}")
+                                elif user_select == '2':
+                                    print("search by Title")
+                                    search_title = input("Search title...: ")
+                                    search_results = session.query(Books).filter(Books.title.like(f"%{search_title}"))
+                                    for row in search_results:
+                                        print(f"ISBN: {row.book_id}\n Title: {row.title}\n Subtitle: {row.subtitle}\n Authors: {row.authors}\n Image: {row.image}\n Url: {row.url}")
+                                elif user_select == '3':
+                                    print("search by Subtitle")
+                                    search_title = input("Search Subtitle...: ")
+                                    search_results = session.query(Books).filter(Books.title.like(f"%{search_title}"))
+                                    for row in search_results:
+                                        print(f"ISBN: {row.book_id}\n Title: {row.title}\n Subtitle: {row.subtitle}\n Authors: {row.authors}\n Image: {row.image}\n Url: {row.url}")
+                                elif user_select == '4':
+                                    print("Search by Isbn number")
+                                    search_title = input("Search Isbn...: ")
+                                    search_results = session.query(Books).filter(Books.title.like(f"%{search_title}"))
+                                    for row in search_results:
+                                        print(f"ISBN: {row.book_id}\n Title: {row.title}\n Subtitle: {row.subtitle}\n Authors: {row.authors}\n Image: {row.image}\n Url: {row.url}")
+                                dashboard_active = False 
+                                search_active = False
                         if user_action == '6':
+                            print("Generate QR-Code")
+                        if user_action == '7':
                             print("Logging out..")
+                            print("Please Login...")
                             dashboard_active = False 
+                            log_active = True 
 
         # Exit Program
         elif user_response == '3':
