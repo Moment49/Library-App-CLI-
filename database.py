@@ -36,7 +36,7 @@ class Books(Base):
     
 
 # Create the db engine and instantiate a connection
-engine = create_engine("sqlite:///users.db", echo=True)
+engine = create_engine("sqlite:///users.db", echo=False)
 Base.metadata.create_all(bind=engine)
 # Create session obj to handle db operations
 Session = sessionmaker(bind=engine)

@@ -243,7 +243,23 @@ def main():
                                 dashboard_active = False 
                                 search_active = False
                         if user_action == '6':
-                            print("Generate QR-Code")
+                            print("<<<Generate Book QR-Code>>>")
+                            user_details = session.query(Users).filter(Users.userId == user_id).first()
+                            print("List of books Url")
+                            for book in  user_details.books:
+                                print(f"Book_link: {book.url}")
+                            qr = qrcode.QRCode(
+                                        version=1,
+                                        error_correction=qrcode.constants.ERROR_CORRECT_L,
+                                        box_size=10,
+                                        border=4)
+                            
+                            book_url_qr = input("Enter book url to generate QRcode: ")
+                            qr.add_data(book_url_qr)
+                            qr.make(fit=True)
+                            img = qr.make_image(fill_color="black", back_color="white")
+                            img.save('book1.png')
+                            dashboard_active = False
                         if user_action == '7':
                             print("Logging out..")
                             print("Please Login...")
